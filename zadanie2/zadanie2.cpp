@@ -9,11 +9,11 @@
 #include<map>
 
 
+// CHANGE INFILE NAME BEFORE STARTING 
+std::string infile = "sample_graph";
+std::string outfile = "out_" + infile;
 std::map <int, std::vector<int>> graf_G;
 std::vector<std::vector<int>> graf_H;
-std::string infile = "fn.txt";
-std::string outfile = "out_" + infile;
-
 
 void read_graph_from_file(std::string infile) {
 	std::ifstream read_file(infile.c_str());
