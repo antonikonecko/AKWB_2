@@ -13,37 +13,43 @@
 std::string infile = "sample_graph.txt";
 std::string outfile = "out_" + infile;
 std::string dotfile = "dot_" + infile + ".dot";
-std::map <int, std::vector<int>> graf_G;
-std::vector<std::vector<int>> graf_H;
+std::map <int, std::vector<int>> adj_list_G;
+std::vector<std::pair<int, int>> edges_G;
+std::vector<std::vector<int>> edge_list_H;
 //std::vector<std::vector<int>> edges_G;
 
 void adj_list_to_edges(std::map <int, std::vector<int>> graf) {
-	std::vector<std::pair<int, int>> edges_G;
+	/*std::vector<std::pair<int, int>> edges_G;*/
 	std::vector<int> temp;
 
-	for (auto it = graf.begin(); it != graf.end(); ++it) {
-		std::cout << "-----" << std::endl;
-		
+	for (auto it = graf.begin(); it != graf.end(); ++it) {	
 		for (auto& nastepnik : it->second) { 
 			
 			int poprzednik = it->first;		
 			std::pair<int, int> krawedz = std::pair<int, int>(poprzednik, nastepnik);		
 			edges_G.push_back(krawedz);
 		}
-	}	
+	}		
 	
+}
+
+
+void save_dot_graph(std::vector<std::pair<int, int>> edges) {
 	std::ofstream dot_file;
 	dot_file.open(dotfile);
 	if (dot_file.good() == true) {
 		dot_file << "digraph {" << std::endl;
-		for (auto it = edges_G.begin(); it != edges_G.end(); it++) {
+		for (auto it = edges.begin(); it != edges.end(); it++) {
 			dot_file << it->first << " -> " << it->second << std::endl;
 		}
 		dot_file << "}";
+		std::cout << std::endl;
+		std::cout << "zapisano plik DOT" << std::endl;
 	}
 	else {
 		std::cout << "Błąd! Nie można zapisać pliku" << std::endl;
-	}	
+	}
+	dot_file.close();
 }
 
 void read_graph_from_file(std::string infile) {
@@ -73,7 +79,7 @@ void read_graph_from_file(std::string infile) {
 		}
 		//  gdyby nastepniki byly w roznej kolejnosci
 		std::sort(curr_vertex_succesors.begin(), curr_vertex_succesors.end());
-		graf_G.insert(std::pair<int, std::vector<int>>(curr_vertex, curr_vertex_succesors));
+		adj_list_G.insert(std::pair<int, std::vector<int>>(curr_vertex, curr_vertex_succesors));
 
 	}
 	read_file.close();
@@ -115,9 +121,9 @@ void save_to_file(int h_iter, std::string outfile, std::map <int, std::vector<in
 			std::cout << i << ": ";
 			//wypisuje nast W
 			for (int j = 0; j < graf.size(); j++) {
-				if (graf_H[j][0] == i) {
-					out_file << graf_H[j][1] << " ";
-					std::cout << graf_H[j][1] << " ";
+				if (edge_list_H[j][0] == i) {
+					out_file << edge_list_H[j][1] << " ";
+					std::cout << edge_list_H[j][1] << " ";
 				}
 			}
 			out_file << "\n";
@@ -169,8 +175,8 @@ void print_transf(std::map <int, std::vector<int>> graf) {
 	std::cout << "V(G)	E(H)" << std::endl;
 	for (int i = 0; i < graf.size(); i++) {
 		std::cout << i + 1 << "	";
-		for (int j = 0; j < graf_H[i].size(); j++) {
-			std::cout << graf_H[i][j] << "  ";
+		for (int j = 0; j < edge_list_H[i].size(); j++) {
+			std::cout << edge_list_H[i][j] << "  ";
 		}
 		std::cout << std::endl;
 	}
@@ -196,7 +202,7 @@ void transform(std::map <int, std::vector<int>> graf) {
 
 		list.push_back(v_p);
 		list.push_back(v_k);
-		graf_H.push_back(list);
+		edge_list_H.push_back(list);
 		v_p += 2;
 	}
 	/*std::cout << std::endl;
@@ -208,15 +214,15 @@ void transform(std::map <int, std::vector<int>> graf) {
 		int w_G = vert->first;
 		for (auto succ = vert->second.cbegin(); succ != vert->second.cend(); ++succ) {
 			nast_w_G = *succ;
-			wk = graf_H[w_G - 1][1];		     // kolumna 3 c w wektorze krawedzi x == W koncowy luku w H z Wx w G (-1 bo w c++ tablica od zera)
-			wp = graf_H[nast_w_G - 1][0];	// == W. początkowy luku H z ktorego powstal W [nast_wx_G - 1]			
-			graf_H[nast_w_G - 1][0] = wk;  // zmieniamy wart kolumny1 b na wart kol2 c 
+			wk = edge_list_H[w_G - 1][1];		     // kolumna 3 c w wektorze krawedzi x == W koncowy luku w H z Wx w G (-1 bo w c++ tablica od zera)
+			wp = edge_list_H[nast_w_G - 1][0];	// == W. początkowy luku H z ktorego powstal W [nast_wx_G - 1]			
+			edge_list_H[nast_w_G - 1][0] = wk;  // zmieniamy wart kolumny1 b na wart kol2 c 
 			for (int it = 0; it < graf.size(); it++) {
-				if (graf_H[it][0] == wp) {
-					graf_H[it][0] = wk;
+				if (edge_list_H[it][0] == wp) {
+					edge_list_H[it][0] = wk;
 				}
-				if (graf_H[it][1] == wp) {
-					graf_H[it][1] = wk;
+				if (edge_list_H[it][1] == wp) {
+					edge_list_H[it][1] = wk;
 				}
 			}
 		}
@@ -229,15 +235,15 @@ void transform(std::map <int, std::vector<int>> graf) {
 	//kompresja 
 	int h_iter = 1;
 	for (int it = 0; it < graf.size(); it++) {
-		for (int n = 0; n < graf_H[it].size(); n++) {
+		for (int n = 0; n < edge_list_H[it].size(); n++) {
 			//jesli skladowa luku- n >=que to porownujemy ją z pozostalymi skl innych lukow 
-			if (graf_H[it][n] >= h_iter) {
-				int graf_H_it_n = graf_H[it][n];
+			if (edge_list_H[it][n] >= h_iter) {
+				int graf_H_it_n = edge_list_H[it][n];
 				for (int it2 = 0; it2 < graf.size(); it2++) {
 					for (int m = 0; m <= 1; m++) {
 						// jesli jakis W w luku == innemu W to zamieniamy jego wartosc na que
-						if (graf_H[it2][m] == graf_H_it_n) {
-							graf_H[it2][m] = h_iter;
+						if (edge_list_H[it2][m] == graf_H_it_n) {
+							edge_list_H[it2][m] = h_iter;
 						}
 					}
 				}
@@ -335,17 +341,18 @@ int main()
 {
 	read_graph_from_file(infile);
 	std::cout << "Graf wejsciowy G: " << std::endl;
-	print_graph(graf_G);
-	adj_list_to_edges(graf_G);
+	print_graph(adj_list_G);
+	adj_list_to_edges(adj_list_G);
+	save_dot_graph(edges_G);
 	//print_vector_of_vector(edges_G);
 	//print_curr_vertex_successors(graf_G,8);
 	//print_vector_of_vector(adj_list);
-	/*if (check(graf_G)) {
-		if (jeden_graf(graf_G)) {
-			liniowosc(graf_G);
-			transform(graf_G);
+	if (check(adj_list_G)) {
+		if (jeden_graf(adj_list_G)) {
+			liniowosc(adj_list_G);
+			transform(adj_list_G);
 		};
 
-	};*/
+	};
 	return 0;
 }
