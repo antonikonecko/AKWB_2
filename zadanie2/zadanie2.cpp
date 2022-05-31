@@ -10,10 +10,41 @@
 
 
 // CHANGE INFILE NAME BEFORE STARTING 
-std::string infile = "sample_graph";
+std::string infile = "sample_graph.txt";
 std::string outfile = "out_" + infile;
+std::string dotfile = "dot_" + infile + ".dot";
 std::map <int, std::vector<int>> graf_G;
 std::vector<std::vector<int>> graf_H;
+//std::vector<std::vector<int>> edges_G;
+
+void adj_list_to_edges(std::map <int, std::vector<int>> graf) {
+	std::vector<std::pair<int, int>> edges_G;
+	std::vector<int> temp;
+
+	for (auto it = graf.begin(); it != graf.end(); ++it) {
+		std::cout << "-----" << std::endl;
+		
+		for (auto& nastepnik : it->second) { 
+			
+			int poprzednik = it->first;		
+			std::pair<int, int> krawedz = std::pair<int, int>(poprzednik, nastepnik);		
+			edges_G.push_back(krawedz);
+		}
+	}	
+	
+	std::ofstream dot_file;
+	dot_file.open(dotfile);
+	if (dot_file.good() == true) {
+		dot_file << "digraph {" << std::endl;
+		for (auto it = edges_G.begin(); it != edges_G.end(); it++) {
+			dot_file << it->first << " -> " << it->second << std::endl;
+		}
+		dot_file << "}";
+	}
+	else {
+		std::cout << "Błąd! Nie można zapisać pliku" << std::endl;
+	}	
+}
 
 void read_graph_from_file(std::string infile) {
 	std::ifstream read_file(infile.c_str());
@@ -143,6 +174,7 @@ void print_transf(std::map <int, std::vector<int>> graf) {
 		}
 		std::cout << std::endl;
 	}
+
 }
 
 
@@ -304,15 +336,16 @@ int main()
 	read_graph_from_file(infile);
 	std::cout << "Graf wejsciowy G: " << std::endl;
 	print_graph(graf_G);
-
+	adj_list_to_edges(graf_G);
+	//print_vector_of_vector(edges_G);
 	//print_curr_vertex_successors(graf_G,8);
 	//print_vector_of_vector(adj_list);
-	if (check(graf_G)) {
+	/*if (check(graf_G)) {
 		if (jeden_graf(graf_G)) {
 			liniowosc(graf_G);
 			transform(graf_G);
 		};
 
-	};
+	};*/
 	return 0;
 }
