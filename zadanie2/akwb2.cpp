@@ -1,4 +1,4 @@
-﻿#include<iostream>
+#include<iostream>
 #include<string>
 #include<fstream>
 #include<vector>
@@ -20,16 +20,16 @@ std::vector<std::pair<int, int>> edges_H;
 std::vector<std::vector<int>> edge_list_H;
 //std::vector<std::vector<int>> edges_G;
 
-void adj_list_to_edges(std::map <int, std::vector<int>> graf) {
+void adj_list_to_edges(std::map <int, std::vector<int>> graph) {
 	/*std::vector<std::pair<int, int>> edges_G;*/
 	std::vector<int> temp;
 
-	for (auto it = graf.cbegin(); it != graf.cend(); ++it) {	
-		for (auto& nastepnik : it->second) { 
+	for (auto it = graph.cbegin(); it != graph.cend(); ++it) {	
+		for (auto& successor : it->second) { 
 			
-			int poprzednik = it->first;		
-			std::pair<int, int> krawedz = std::pair<int, int>(poprzednik, nastepnik);		
-			edges_G.push_back(krawedz);
+			int predecessor = it->first;		
+			std::pair<int, int> edge = std::pair<int, int>(predecessor, successor);		
+			edges_G.push_back(edge);
 		}
 	}		
 	
@@ -38,16 +38,16 @@ void adj_list_to_edges(std::map <int, std::vector<int>> graf) {
 void vec_of_vec_to_vec_of_pair(std::vector<std::vector<int>> vec_of_vec) {
 	
 	for (int i = 0; i < vec_of_vec.size(); i++) {		
-		int v_p = vec_of_vec[i][0];
-		int v_k = vec_of_vec[i][1];
-		std::pair<int, int> krawedz = std::pair<int, int>(v_p, v_k);
-		edges_H.push_back(krawedz);
+		int start_vert = vec_of_vec[i][0];
+		int end_vert = vec_of_vec[i][1];
+		std::pair<int, int> edge = std::pair<int, int>(start_vert, end_vert);
+		edges_H.push_back(edge);
 	}
 }
 
 
-void save_dot_format(std::vector<std::pair<int, int>> edges, std::string graf_name) {
-	std::string dotfile = "dot/" + graf_name + "_" + infile + ".dot";
+void save_dot_format(std::vector<std::pair<int, int>> edges, std::string graph_name) {
+	std::string dotfile = "dot/" + graph_name + "_" + infile + ".dot";
 	std::ofstream dot_file;
 	dot_file.open(dotfile);
 	if (dot_file.good() == true) {
@@ -55,20 +55,19 @@ void save_dot_format(std::vector<std::pair<int, int>> edges, std::string graf_na
 		/*dot_file << "landscape=true" << std::endl;*/
 		int i = 1;
 		//for (auto it = edges.begin(); it != edges.end(); it++) {
-		//	/*dot_file << it->first << " -> " << it->second << "[label = " << '"'<< "a to b" <<'"]' << std::endl;*/
-		//	if(graf_name == "H")
+		//	if(graph_name == "H")
 		//	dot_file << it->first << " -> " << it->second << " [label = " << '"' << i << '"' << ']' << std::endl;
 		//	else {
 		//		dot_file << it->first << " -> " << it->second << std::endl;
 		//	}	
 		//	i++;
 		//}
-		if (graf_name == "G") {
+		if (graph_name == "G") {
 			for (auto it = adj_list_G.cbegin(); it != adj_list_G.cend(); ++it) {
 				if (!it->second.empty()) {
-					for (auto& nastepnik : it->second) {
-						int poprzednik = it->first;
-						dot_file << it->first << " -> " << nastepnik << std::endl;
+					for (auto& successor : it->second) {
+						int predecessor = it->first;
+						dot_file << it->first << " -> " << successor << std::endl;
 					}
 				}
 				else {
@@ -76,19 +75,18 @@ void save_dot_format(std::vector<std::pair<int, int>> edges, std::string graf_na
 				}		
 			}
 		}
-		else if (graf_name == "H") {
+		else if (graph_name == "H") {
 			for (auto it = edges.cbegin(); it != edges.cend(); it++) {
-				/*dot_file << it->first << " -> " << it->second << "[label = " << '"'<< "a to b" <<'"]' << std::endl;*/
 				dot_file << it->first << " -> " << it->second << " [label = " << '"' << i << '"' << ']' << std::endl;
 				i++;
 			}
 		}
 		dot_file << "}";
 		std::cout << std::endl;
-		std::cout << "zapisano plik DOT:"<< dotfile << std::endl;
+		std::cout << "DOT file saved"<< dotfile << std::endl;
 	}
 	else {
-		std::cout << "Błąd! Nie można zapisać pliku" << std::endl;
+		std::cout << "Error! Cannot save file." << std::endl;
 	}
 	dot_file.close();
 }
@@ -98,10 +96,10 @@ void read_graph_from_file(std::string infile) {
 	std::string infile_path = "input/" + infile + ".txt";
 	std::ifstream read_file(infile_path.c_str());
 	if (read_file.fail()) {
-		std::cerr << "Nie można otworzyc pliku! " << infile << std::endl;
+		std::cerr << "Cannot open file! " << infile << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	std::cout << "Wczytywanie pliku: " << infile << std::endl;
+	std::cout << "Reading file: " << infile << std::endl;
 	std::cout << std::endl;
 	std::string line;
 	while (std::getline(read_file, line)) {
@@ -128,41 +126,41 @@ void read_graph_from_file(std::string infile) {
 }
 
 
-void print_curr_vertex_successors(std::map <int, std::vector<int>> graf, int vertex_id) {
+void print_curr_vertex_successors(std::map <int, std::vector<int>> graph, int vertex_id) {
 	std::cout << std::endl;
-	auto it = graf.find(vertex_id);
+	auto it = graph.find(vertex_id);
 	std::cout << it->first << ": ";
-	for (auto nastepnik = it->second.cbegin(); nastepnik != it->second.cend(); ++nastepnik) {
-		std::cout << *nastepnik << " ";
+	for (auto successor = it->second.cbegin(); successor != it->second.cend(); ++successor) {
+		std::cout << *successor << " ";
 	}
 }
 
 
-void print_graph(std::map <int, std::vector<int>> graf) {
-	for (auto it = graf.cbegin(); it != graf.cend(); ++it)
+void print_graph(std::map <int, std::vector<int>> graph) {
+	for (auto it = graph.cbegin(); it != graph.cend(); ++it)
 	{
 		std::cout << it->first << ": ";
-		for (auto nastepnik = it->second.cbegin(); nastepnik != it->second.cend(); ++nastepnik) {
-			std::cout << *nastepnik << " ";
+		for (auto successor = it->second.cbegin(); successor != it->second.cend(); ++successor) {
+			std::cout << *successor << " ";
 		}
 		std::cout << std::endl;
 	}
 }
 
 
-void save_to_file(int h_iter, std::string outfile, std::map <int, std::vector<int>> graf) {
+void save_to_file(int h_iter, std::string outfile, std::map <int, std::vector<int>> graph) {
 	std::cout << std::endl;
 	std::cout << "--------------- " << std::endl;
-	std::cout << "Graf H: " << std::endl;
+	std::cout << "graph H: " << std::endl;
 	std::ofstream out_file;
 	out_file.open(outfile);
 	if (out_file.good() == true) {
-		//wypisuje W 
+		//print vertices
 		for (int i = 1; i < h_iter; i++) {
 			out_file << i << " ";
 			std::cout << i << ": ";
-			//wypisuje nast W
-			for (int j = 0; j < graf.size(); j++) {
+			//print successors
+			for (int j = 0; j < graph.size(); j++) {
 				if (edge_list_H[j][0] == i) {
 					out_file << edge_list_H[j][1] << " ";
 					std::cout << edge_list_H[j][1] << " ";
@@ -173,10 +171,10 @@ void save_to_file(int h_iter, std::string outfile, std::map <int, std::vector<in
 		}
 		std::cout << "--------------- " << std::endl;
 		std::cout << std::endl;
-		std::cout << "Zapisano do pliku: " << outfile << std::endl;
+		std::cout << "File saved: " << outfile << std::endl;
 	}
 	else {
-		std::cout << "Błąd! Nie można zapisać pliku" << std::endl;
+		std::cout << "Error! file cannot be saved" << std::endl;
 	}
 
 }
@@ -192,9 +190,9 @@ void print_vector_of_vector(std::vector<std::vector<int>> vec_of_vec) {
 }
 
 
-void print_transf(std::map <int, std::vector<int>> graf) {
+void print_transf(std::map <int, std::vector<int>> graph) {
 	std::cout << "V(G)	E(H)" << std::endl;
-	for (int i = 0; i < graf.size(); i++) {
+	for (int i = 0; i < graph.size(); i++) {
 		std::cout << i + 1 << "	";
 		for (int j = 0; j < edge_list_H[i].size(); j++) {
 			std::cout << edge_list_H[i][j] << "  ";
@@ -205,57 +203,63 @@ void print_transf(std::map <int, std::vector<int>> graf) {
 }
 
 
-void transform(std::map <int, std::vector<int>> graf) {
+void transform(std::map <int, std::vector<int>> graph) {
 	std::cout << std::endl;
-	std::cout << "***TRANSFORMACJA*** " << std::endl;
+	std::cout << "***TRANSFORMATION*** " << std::endl;
 	std::cout << std::endl;
-	int v_p = 1;
-	int nast_w_G, wp, wk;
-	for (auto vert = graf.cbegin(); vert != graf.cend(); ++vert) {
-		int v_k = vert->first * 2;		
+	int start_vert = 1;
+	int vertG_succ, edgeH_start_vert, edgeH_end_vert;
+	/*
+	create edge list - each vert in G is transformed into edge in H 
+		 V(G)1 -> E(H)1 2 
+		 V(G)2 -> E(H)3 4 
+		 V(G)3 -> E(H)5 6
+	 */
+	for (auto vert = graph.cbegin(); vert != graph.cend(); ++vert) {
+		int end_vert = vert->first * 2;		
 		std::vector<int>list;
-		list.push_back(v_p);
-		list.push_back(v_k);
+		list.push_back(start_vert);
+		list.push_back(end_vert);
 		edge_list_H.push_back(list);
-		v_p += 2;
+		start_vert += 2;
 	}
 	/*std::cout << std::endl;
 	std::cout << "############" << std::endl;
-	print_transf(graf);
+	print_transf(graph);
 	std::cout << "############" << std::endl;*/
-	for (auto vert = graf.cbegin(); vert != graf.cend(); ++vert) {
-		int w_G = vert->first;
+	for (auto vert = graph.cbegin(); vert != graph.cend(); ++vert) {
+		int vert_G = vert->first;
 		for (auto succ = vert->second.cbegin(); succ != vert->second.cend(); ++succ) {
-			nast_w_G = *succ;			
-			wp = edge_list_H[nast_w_G - 1][0];	  	
-			wk = edge_list_H[w_G - 1][1];	     
-			edge_list_H[nast_w_G - 1][0] = wk; 
-			for (int it = 0; it < graf.size(); it++) {
-				if (edge_list_H[it][0] == wp) {
-					edge_list_H[it][0] = wk;
+			vertG_succ = *succ;			
+			edgeH_start_vert = edge_list_H[vertG_succ - 1][0];	  	
+			edgeH_end_vert = edge_list_H[vert_G - 1][1];	     
+			edge_list_H[vertG_succ - 1][0] = edgeH_end_vert; 
+			for (int it = 0; it < graph.size(); it++) {
+				if (edge_list_H[it][0] == edgeH_start_vert) {
+					edge_list_H[it][0] = edgeH_end_vert;
 				}
-				if (edge_list_H[it][1] == wp) {
-					edge_list_H[it][1] = wk;
+				if (edge_list_H[it][1] == edgeH_start_vert) {
+					edge_list_H[it][1] = edgeH_end_vert;
 				}
 			}
 		}
 	}
 	/*std::cout << std::endl;
 	std::cout << "*****************" << std::endl;
-	print_transf(graf);
+	print_transf(graph);
 	std::cout << "*****************" << std::endl;*/
 
-	//indeksowanie aby zachowac numeracje rosnaco od 1
+	//indexing
 	int h_iter = 1;
-	for (int it = 0; it < graf.size(); it++) {
+	for (int it = 0; it < graph.size(); it++) {
 		for (int n = 0; n < edge_list_H[it].size(); n++) {
-			//jesli skladowa luku- n >=hiter to porownujemy ją z pozostalymi skl innych lukow 
+			//If the component of edge n (vertex) >= hiter, then compare it with the other vertices of other edges.
 			if (edge_list_H[it][n] >= h_iter) {
-				int graf_H_it_n = edge_list_H[it][n];
-				for (int it2 = 0; it2 < graf.size(); it2++) {
+				int graph_H_it_n = edge_list_H[it][n];
+				for (int it2 = 0; it2 < graph.size(); it2++) {
 					for (int m = 0; m <= 1; m++) {
-						// jesli jakis W w luku == innemu W to zamieniamy jego wartosc na iter
-						if (edge_list_H[it2][m] == graf_H_it_n) {
+						// If a vertex in an edge is equal to another vertex, replace its value with "h_iter".
+						if (edge_list_H[it2][m] == graph_H_it_n) {
 							edge_list_H[it2][m] = h_iter;
 						}
 					}
@@ -264,35 +268,33 @@ void transform(std::map <int, std::vector<int>> graf) {
 			}
 		}
 	}
-	print_transf(graf);
+	print_transf(graph);
 	vec_of_vec_to_vec_of_pair(edge_list_H);
 	save_dot_format(edges_H, "H");
-	save_to_file(h_iter, outfile, graf);
+	save_to_file(h_iter, outfile, graph);
 }
 
 
-bool linearity(std::map <int, std::vector<int>> graf) {
-	/*1-graf G jest skierowanym grafem liniowym, wtedy i tylko wtedy, 
-	gdy dla wszystkich jego par wierzchołków x i y spełniony jest warunek:
-
-	N+(x) ∩ N+(y) ≠ Ø ⇒ ( N+(x) = N+(y) ∧ N–(x) ∩ N–(y) = Ø ),
-	gdzie N–(x) oznacza zbiór bezpośrednich poprzedników x.
-	*/
+bool linearity(std::map <int, std::vector<int>> graph) {
+	/*1- Graph G is a directed linear graph only if for all pairs of its 
+	vertices x and y, the following condition is satisfied:
+	 N+(x) ∩ N+(y) ≠ Ø ⇒ ( N+(x) = N+(y) ∧ N–(x) ∩ N–(y) = Ø ),
+		where N–(x) denotes the set of direct predecessors of x.*/
 	int succ1_val, succ2_val;
 	int vert_start_val = 1;
-	for (auto vert_start = graf.cbegin(); vert_start != graf.cend(); ++vert_start) {		
+	for (auto vert_start = graph.cbegin(); vert_start != graph.cend(); ++vert_start) {		
 		if (vert_start->second.size() > 1) {			
 			for (auto succ1 = vert_start->second.cbegin(); succ1 != vert_start->second.cend(); ++succ1) {
 				for (auto succ2 = vert_start->second.cbegin(); succ2 != vert_start->second.cend(); ++succ2) {					
 					succ1_val = *succ1;
 					succ2_val = *succ2;
 					if (succ1_val != succ2_val) {						
-						for (auto succ_of_succ1 = graf.find(succ1_val)->second.cbegin(); succ_of_succ1 < graf.find(succ1_val)->second.cend(); ++succ_of_succ1) {
-							for (auto succ_of_succ2 = graf.find(succ2_val)->second.cbegin(); succ_of_succ2 < graf.find(succ2_val)->second.cend(); ++succ_of_succ2) {								
+						for (auto succ_of_succ1 = graph.find(succ1_val)->second.cbegin(); succ_of_succ1 < graph.find(succ1_val)->second.cend(); ++succ_of_succ1) {
+							for (auto succ_of_succ2 = graph.find(succ2_val)->second.cbegin(); succ_of_succ2 < graph.find(succ2_val)->second.cend(); ++succ_of_succ2) {								
 								int succ_of_succ1_val = *succ_of_succ1;
 								int succ_of_succ2_val = *succ_of_succ2;
 								if (*succ_of_succ1 == *succ_of_succ2) {
-									std::cout << "nie liniowy |" << std::endl;	
+									std::cout << "not line graph |" << std::endl;	
 									return false;
 								}								
 							}							
@@ -304,20 +306,20 @@ bool linearity(std::map <int, std::vector<int>> graf) {
 		}
 		vert_start_val++;
 	}
-	std::cout << "liniowy |" << std::endl;
+	std::cout << "line graph |" << std::endl;
 	return true;
 }
 
 
-int adjoint(std::map <int, std::vector<int>> graf) {
+int adjoint(std::map <int, std::vector<int>> graph) {
 
 	bool same = false;
 	std::cout << std::endl;
-	for (auto vert1 = graf.cbegin(); vert1 != std::prev(graf.cend()); ++vert1) {
+	for (auto vert1 = graph.cbegin(); vert1 != std::prev(graph.cend()); ++vert1) {
 		if (vert1->second.size() > 1) {
 			const auto duplicate = std::adjacent_find(vert1->second.cbegin(), vert1->second.cend());
 			if (duplicate != vert1->second.end()){
-				std::cout << "Multigraf, wielokrotna krawedz:  " << vert1->first << " -> " << *duplicate << "\n";
+				std::cout << "Multigraph, multiple edge:  " << vert1->first << " -> " << *duplicate << "\n";
 				return 0;
 			}				
 			/*for (auto succ1 = vert1->second.cbegin(); succ1 != vert1->second.cend(); ++succ1) {
@@ -325,14 +327,14 @@ int adjoint(std::map <int, std::vector<int>> graf) {
 					if (*succ1 == *succ2) {
 						std::cout << vert1->first;
 						std::cout << ": " << "a " << *succ1 << "  b " << *succ2 << std::endl;
-						std::cout << "! multi graf !" << std::endl;
-						std::cout << "| !GRAF NIESPRZEZONY! |" << std::endl;
+						std::cout << "! multi graph !" << std::endl;
+						std::cout << "| !graph not-adjoint! |" << std::endl;
 						return 0;
 					}
 				}
 			}*/
 		}
-		for (auto vert2 = std::next(graf.cbegin()); vert2 != graf.cend(); ++vert2) {			
+		for (auto vert2 = std::next(graph.cbegin()); vert2 != graph.cend(); ++vert2) {			
 			if (vert1 != vert2) {
 				//std::cout << std::endl;
 				//std::cout << "A:" << vert1->first;
@@ -345,7 +347,7 @@ int adjoint(std::map <int, std::vector<int>> graf) {
 						for (auto succ2 = vert2->second.cbegin(); succ2 != vert2->second.cend(); ++succ2) {
 							if (*succ1 == *succ2) {
 								std::cout << " " << *succ1 << " == " << *succ2 << " not ok ";
-								std::cout << "| !GRAF NIESPRZEZONY! |" << std::endl;
+								std::cout << "| !graph NOT ADJOINT! |" << std::endl;
 								same = false;
 								return 0;
 							}
@@ -359,7 +361,7 @@ int adjoint(std::map <int, std::vector<int>> graf) {
 					}
 					if (same == false) {
 						std::cout << " not same ";
-						std::cout << "| !GRAF NIESPRZEZONY! |" << std::endl;
+						std::cout << "| !graph NOT ADJOINT!  |" << std::endl;
 						return 0;
 					}
 				}
@@ -367,7 +369,7 @@ int adjoint(std::map <int, std::vector<int>> graf) {
 		}
 	}
 	if (same == true) {
-		std::cout << "| graf sprzezony |";
+		std::cout << "| adjoint graph  |";
 		return 1;
 	}
 }
@@ -375,15 +377,15 @@ int adjoint(std::map <int, std::vector<int>> graf) {
 
 int main()
 {
-	std::cout << "Podaj nazwe pliku: " << std::endl;
+	std::cout << "Provide filename: " << std::endl;
 	std::cin >> infile;
 	read_graph_from_file(infile);
-	std::cout << "Graf wejsciowy G: " << std::endl;
+	std::cout << "graph G: " << std::endl;
 	print_graph(adj_list_G);
 	adj_list_to_edges(adj_list_G);
 	save_dot_format(edges_G, "G");
 	//print_vector_of_vector(edges_G);
-	//print_curr_vertex_successors(graf_G,8);
+	//print_curr_vertex_successors(graph_G,8);
 	//print_vector_of_vector(adj_list);
 	if (adjoint(adj_list_G)) {		 
 			linearity(adj_list_G);
